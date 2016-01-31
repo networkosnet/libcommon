@@ -1,3 +1,4 @@
+import strutils
 
 proc `&=`*[T](a: var seq[T], b: seq[T]) =
   for i in b:
@@ -48,7 +49,7 @@ proc unpackSeq3*[T](args: T): auto =
 
 const hexLetters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
 
-proc encodeHex(s: string): string =
+proc encodeHex*(s: string): string =
   result = ""
   result.setLen(s.len * 2)
   for i in 0..s.len-1:
@@ -56,6 +57,18 @@ proc encodeHex(s: string): string =
     var b = ord(s[i]) and ord(0x0f)
     result[i * 2] = hexLetters[a]
     result[i * 2 + 1] = hexLetters[b]
+
+proc decodeHex*(s: string): string =
+  if s.len mod 2 == 1: raise newException(ValueError, "odd-length string")
+  let s = s.toLower
+
+  result = newString(int(s.len / 2))
+  for i in 0..<int(s.len/2):
+    let a = find(hexLetters, s[i * 2])
+    let b = find(hexLetters, s[i * 2 + 1])
+    if a == -1 or b == -1:
+      raise newException(ValueError, "invalid hex digit")
+    result[i] = char((a shl 4) or b)
 
 proc urandom*(len: int): string =
   var f = open("/dev/urandom")
