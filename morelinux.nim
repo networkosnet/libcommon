@@ -55,6 +55,8 @@ proc setNetNs*(targetName: string) =
   if netns < 0:
     raiseOSError(osLastError())
 
+  defer: discard close(netns)
+
   if setns(netns, CLONE_NEWNET) < 0:
     raiseOSError(osLastError())
 
