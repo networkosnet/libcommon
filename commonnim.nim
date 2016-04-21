@@ -1,14 +1,5 @@
 import strutils
 
-proc `&=`*[T](a: var seq[T], b: seq[T]) =
-  for i in b:
-    a.add(i)
-
-proc flatten*[T](a: seq[seq[T]]): seq[T] =
-  result = @[]
-  for subseq in a:
-    result &= subseq
-
 proc readAllBuffer(file: File): string =
   result = ""
   const BufSize = 1024
@@ -46,38 +37,5 @@ proc unpackSeq3*[T](args: T): auto =
   return (args[0], args[1], args[2])
 
 # urandom
-
-const hexLetters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
-
-proc encodeHex*(s: string): string =
-  result = ""
-  result.setLen(s.len * 2)
-  for i in 0..s.len-1:
-    var a = ord(s[i]) shr 4
-    var b = ord(s[i]) and ord(0x0f)
-    result[i * 2] = hexLetters[a]
-    result[i * 2 + 1] = hexLetters[b]
-
-proc decodeHex*(s: string): string =
-  if s.len mod 2 == 1: raise newException(ValueError, "odd-length string")
-  let s = s.toLower
-
-  result = newString(int(s.len / 2))
-  for i in 0..<int(s.len/2):
-    let a = find(hexLetters, s[i * 2])
-    let b = find(hexLetters, s[i * 2 + 1])
-    if a == -1 or b == -1:
-      raise newException(ValueError, "invalid hex digit")
-    result[i] = char((a shl 4) or b)
-
-proc urandom*(len: int): string =
-  var f = open("/dev/urandom")
-  defer: f.close
-  result = ""
-  result.setLen(len)
-  let actualRead = f.readBuffer(result.cstring, len)
-  if actualRead != len:
-    raise newException(IOError, "cannot read random bytes")
-
-proc hexUrandom*(len: int): string =
-  urandom(len).encodeHex
+import collections/bytes, collections/random, collections/lang
+export bytes, random, lang
