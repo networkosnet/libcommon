@@ -70,3 +70,8 @@ proc remountSys*() =
     raiseOSError(osLastError())
   if mount("none", "/sys", "sysfs", 0.culong, nil) < 0:
     raiseOSError(osLastError())
+
+proc createDir*(path: string, mode: int) =
+  if mkdir(path, mode.cint) == -1:
+    if errno != EEXIST:
+      raiseOSError(osLastError())
